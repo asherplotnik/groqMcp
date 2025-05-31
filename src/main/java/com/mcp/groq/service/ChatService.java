@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mcp.groq.configuration.RestTemplateUtil;
 import com.mcp.groq.dto.*;
-import com.mcp.groq.utils.JsonUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
