@@ -1,0 +1,33 @@
+{
+  "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+  "temperature": 1,
+  "max_completion_tokens": 1024,
+  "top_p": 1,
+  "stream": true,
+  "stop": null,
+  "messages": [
+    { "role": "system", "content": "You can call find_document({collection, filter}) to read from MongoDB." },
+    { "role": "user",   "content": "Get the user where userId = '026662437' from the users collection." }
+  ],
+  "functions": [
+    {
+      "name": "find_document",
+      "description": "Find a single document in a MongoDB collection using a JSON filter.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "collection": {
+            "type": "string",
+            "description": "Name of the MongoDB collection."
+          },
+          "filter": {
+            "type": "object",
+            "description": "A JSON object representing the query filter, e.g. {\"userId\":\"026662437\"}."
+          }
+        },
+        "required": ["collection", "filter"]
+      }
+    }
+  ],
+  "function_call": "auto"
+}
