@@ -1,0 +1,5 @@
+spring.application.name=groq
+mongodb.database=test
+mongodb.uri=mongodb://localhost:27017/
+
+groq.model=meta-llama/llama-4-scout-17b-16e-instruct
