@@ -3,7 +3,7 @@ package com.mcp.groq.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mcp.groq.configuration.RestTemplateUtil;
+import com.mcp.groq.configuration.GroqRestTemplate;
 import com.mcp.groq.dto.*;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,17 +13,17 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class ChatService {
-    private final RestTemplateUtil restTemplateUtil;
-    private final MongoSearchService searchService;
+public class MongoUpdateChatService {
+    private final GroqRestTemplate groqRestTemplate;
+    private final MongoService mongoService;
     private final ObjectMapper objectMapper;
     private static final String FUNCTION_NAME = "tool_calls";
     private static final String URL = "https://api.groq.com/openai/v1/chat/completions";
     private final String modelName;
 
-    public ChatService(RestTemplateUtil restTemplateUtil, MongoSearchService searchService, ObjectMapper objectMapper, @Value("${groq.model}") String modelName) {
-        this.restTemplateUtil = restTemplateUtil;
-        this.searchService = searchService;
+    public MongoUpdateChatService(GroqRestTemplate groqRestTemplate, MongoService mongoService, ObjectMapper objectMapper, @Value("${groq.model}") String modelName) {
+        this.groqRestTemplate = groqRestTemplate;
+        this.mongoService = mongoService;
         this.objectMapper = objectMapper;
         this.modelName = modelName;
     }
@@ -36,8 +36,8 @@ public class ChatService {
                 """).build();
         GroqMessage userMessage = GroqMessage.builder().role("user").content(userText).build();
         GroqRequest groqRequest = getGroqRequest(systemMessage, userMessage);
-        String initialResponse = restTemplateUtil
-                .post(URL, groqRequest,String.class);
+        String initialResponse = groqRestTemplate
+                .groqPost(URL, groqRequest,String.class);
         try {
             JsonNode root = objectMapper.readTree(initialResponse);
             JsonNode choice = root.path("choices").get(0).path("message");
@@ -65,22 +65,19 @@ public class ChatService {
                 .build();
         GroqParameters params = GroqParameters.builder()
                 .type("object")
-                .properties(
-                        GroqProperties.builder()
-                                .collection(collectionProp)
-                                .filter(filterProp)
-                                .build()
-                )
+                .properties(GroqProperties.builder()
+                        .collection(collectionProp)
+                        .filter(filterProp)
+                        .build())
                 .required(List.of("collection", "filter"))
-                .build();
-        GroqFunction findDocFunction = GroqFunction.builder()
-                .name("find_document")
-                .description("Find a single document in the 'users' collection using a JSON filter.")
-                .parameters(params)
                 .build();
         GroqTool findDocTool = GroqTool.builder()
                 .type("function")
-                .function(findDocFunction)
+                .function(GroqFunction.builder()
+                        .name("find_document")
+                        .description("Find a single document in the 'users' collection using a JSON filter.")
+                        .parameters(params)
+                        .build())
                 .build();
         return GroqRequest.builder()
                 .model(modelName)
@@ -111,7 +108,7 @@ public class ChatService {
             Map<String, Object> toolResult = Map.of("found", !docs.isEmpty(),"data", docs);
             String toolResultJson = objectMapper.writeValueAsString(toolResult);
             Map<String, Object> followUpPayload = getFollowUpPayload(systemMessage, userMessage, toolCallId, functionName, argumentsJson, toolResultJson);
-            String followUpResponse = restTemplateUtil.post(URL, followUpPayload, String.class);
+            String followUpResponse = groqRestTemplate.groqPost(URL, followUpPayload, String.class);
             return createModelResponseDto(followUpResponse);
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse tool arguments or results", e);
@@ -169,7 +166,7 @@ public class ChatService {
         String fieldName = filterMap.keySet().iterator().next();
         Object rawValue = filterMap.get(fieldName);
         String fieldValue = rawValue.toString();
-        List<Document> docs = searchService.search(collectionName, fieldName, fieldValue);
+        List<Document> docs = mongoService.search(collectionName, fieldName, fieldValue);
         return docs;
     }
 

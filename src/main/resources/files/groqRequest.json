@@ -1,0 +1,49 @@
+{
+  "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+  "temperature": 1,
+  "max_completion_tokens": null,
+  "top_p": null,
+  "stream": false,
+  "stop": null,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You can call find_document({collection, filter}) to read from MongoDB.\nWhen you do, the 'collection' must be \"users\" and the 'filter' must look like {\"userId\":\"026662437\"},\ni.e. the 'userId' field must be digits only (no \"id\" prefix). Do not prepend \"id\" to the numeric string.\n",
+    },
+    {
+      "role": "user",
+      "content": "find id 342460623"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "find_document",
+        "description": "Find a single document in the 'users' collection using a JSON filter.",
+        "parameters": {
+          "type": "object",
+          "required": [
+            "collection",
+            "filter"
+          ],
+          "properties": {
+            "collection": {
+              "type": "string",
+              "description": "Name of the MongoDB collection (only 'users' is supported here)",
+              "enumValues": [
+                "users"
+              ]
+            },
+            "filter": {
+              "type": "object",
+              "description": "A JSON object with exactly one key (field name) and a string value to match",
+              "enumValues": null
+            }
+          }
+        }
+      }
+    }
+  ],
+  "tool_choice": "auto"
+}

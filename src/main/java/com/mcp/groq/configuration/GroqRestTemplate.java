@@ -8,17 +8,17 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @Component
-public class RestTemplateUtil {
+public class GroqRestTemplate {
 
     private final RestTemplate restTemplate;
     private final String key;
 
-    public RestTemplateUtil(RestTemplate restTemplate, @Value("${groq.auth.key}")String key) {
+    public GroqRestTemplate(RestTemplate restTemplate, @Value("${groq.auth.key}")String key) {
         this.restTemplate = restTemplate;
         this.key = key;
     }
 
-    public <T> T post(String url, Object requestBody, Class<T> responseType) {
+    public <T> T groqPost(String url, Object requestBody, Class<T> responseType) {
         Map<String, String> headersMap = Map.of("Authorization", "Bearer " + key);
         return postForObject(url, requestBody, headersMap, responseType);
     }
@@ -39,7 +39,7 @@ public class RestTemplateUtil {
         return responseEntity.getBody();
     }
 
-    public <T> T get(String url, Class<T> responseType) {
+    public <T> T groqGet(String url, Class<T> responseType) {
         Map<String, String> headersMap = Map.of("Authorization", "Bearer " + key);
         return getForObject(url, headersMap, responseType);
     }

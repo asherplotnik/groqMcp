@@ -1,0 +1,45 @@
+{
+  "currencyCode": "USD",
+  "originDestinations": [
+    {
+      "id": "1",
+      "originLocationCode": "TLV",
+      "destinationLocationCode": "BKK",
+      "departureDateTimeRange": {
+        "date": "2025-06-10",
+        "time": "00:00:00"
+      }
+    }
+  ],
+  "travelers": [
+    {
+      "id": "1",
+      "travelerType": "ADULT"
+    },
+    {
+      "id": "2",
+      "travelerType": "ADULT"
+    },
+    {
+      "id": "3",
+      "travelerType": "CHILD"
+    }
+  ],
+  "sources": [
+    "GDS"
+  ],
+  "searchCriteria": {
+    "maxFlightOffers": 2,
+    "flightFilters": {
+      "cabinRestrictions": [
+        {
+          "cabin": "ECONOMY",
+          "coverage": "ALL_SEGMENTS",
+          "originDestinationIds": [
+            "1"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -19,7 +19,7 @@ public class JsonUtils {
         return mapper.readValue(new File(filePath), clazz);
     }
 
-    public static void printJson(Object obj) throws IOException {
+    public static void printJson(Object obj) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -34,6 +34,10 @@ public class JsonUtils {
             }
             return;
         }
-        log.info(mapper.writeValueAsString(obj));
+        try {
+            log.info(mapper.writeValueAsString(obj));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
