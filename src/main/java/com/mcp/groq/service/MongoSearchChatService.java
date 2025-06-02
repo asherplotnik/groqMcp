@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mcp.groq.configuration.GroqRestTemplate;
 import com.mcp.groq.dto.*;
 import com.mcp.groq.utils.JsonUtils;
+import lombok.Getter;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class MongoSearchChatService {
+@Getter
+public class MongoSearchChatService implements Tool{
+    private final String name = "mongoSearchTool";
     private final GroqRestTemplate groqRestTemplate;
     private final MongoService mongoService;
     private final ObjectMapper objectMapper;
@@ -29,7 +32,8 @@ public class MongoSearchChatService {
         this.modelName = modelName;
     }
 
-    public ModelResponseDto processFreeText(String userText) {
+    @Override
+    public ModelResponseDto execute(String userText) {
         GroqMessage systemMessage = GroqMessage.builder().role("system").content("""
                 You can call find_document({collection, filter}) to read from MongoDB.
                 When you do, the 'collection' must be "users" and the 'filter' must look like {"userId":"026662437"}, 

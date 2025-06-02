@@ -1,16 +1,15 @@
 package com.mcp.groq.controller;
 
-import com.mcp.groq.configuration.ApiRestTemplate;
+import com.mcp.groq.dto.FlightRequest;
 import com.mcp.groq.dto.FreeTextRequest;
 import com.mcp.groq.dto.ModelResponseDto;
-import com.mcp.groq.dto.flight.Traveler;
+import com.mcp.groq.service.ApiService;
 import com.mcp.groq.service.MongoSearchChatService;
 import com.mcp.groq.service.MongoService;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController("/api")
@@ -18,7 +17,7 @@ import java.util.List;
 public class GroqRestController {
 
     private final MongoSearchChatService mongoSearchChatService;
-    private final ApiRestTemplate apiRestTemplate;
+    private final ApiService apiService;
 
     private final MongoService service;
 
@@ -32,18 +31,18 @@ public class GroqRestController {
     public ModelResponseDto searchMongo(
             @RequestBody FreeTextRequest request
     ) {
-        return mongoSearchChatService.processFreeText(request.getText());
+        return mongoSearchChatService.execute(request.getText());
     }
 
     @PostMapping("/chat/mongo/update")
     public ModelResponseDto updateMongo(
             @RequestBody FreeTextRequest request
     ) {
-        return mongoSearchChatService.processFreeText(request.getText());
+        return mongoSearchChatService.execute(request.getText());
     }
 
     @PostMapping("/flight/search")
     public String searchFlight(@RequestBody FlightRequest requestBody) {
-        return apiRestTemplate.postFlightOffers(requestBody.getOrigin(), requestBody.getDestination(), requestBody.getDateTime(), requestBody.getTravelers());
+        return apiService.searchFlightOffer(requestBody);
     }
 }

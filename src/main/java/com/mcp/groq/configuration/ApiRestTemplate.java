@@ -1,6 +1,8 @@
 package com.mcp.groq.configuration;
 
+import com.mcp.groq.dto.TokenResponse;
 import com.mcp.groq.dto.flight.*;
+import com.mcp.groq.utils.JsonUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -8,6 +10,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -25,18 +28,21 @@ public class ApiRestTemplate {
         this.clientSecret = clientSecret;
     }
 
-    private String getToken() {
+    private TokenResponse getToken() {
         Map<String, String> headersMap = Map.of("Content-Type", "application/x-www-form-urlencoded");
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "client_credentials");
         body.add("client_id", clientId);
         body.add("client_secret", clientSecret);
-        return postForObject("https://test.api.amadeus.com/v1/security/oauth2/token", null, headersMap, String.class);
+        return postForObject("https://test.api.amadeus.com/v1/security/oauth2/token", body, headersMap, TokenResponse.class);
     }
 
     public String postFlightOffers(String origin, String destination, LocalDateTime dateTime, List<Traveler> travelerList) {
-        String token = getToken();
-        Map<String, String> headersMap = Map.of("Authorization", "Bearer " + token);
+        TokenResponse tokenResponse = getToken();
+        if (tokenResponse == null || !tokenResponse.getState().equals("approved")) {
+            return "Unauthorized. Token not approved";
+        }
+        Map<String, String> headersMap = Map.of("Authorization", "Bearer " + tokenResponse.getAccessToken());
         FlightOfferRequest requestBody = getFlightOfferRequest(origin, destination, dateTime,travelerList);
         return postForObject("https://test.api.amadeus.com/v2/shopping/flight-offers", requestBody, headersMap, String.class);
     }
@@ -48,8 +54,8 @@ public class ApiRestTemplate {
                         .originLocationCode(origin)
                         .destinationLocationCode(destination)
                         .departureDateTimeRange(DepartureDateTimeRange.builder()
-                                .date(dateTime.getYear() + "," + dateTime.getMonthValue() + "," + dateTime.getDayOfMonth())
-                                .time(dateTime.getHour() + ":" + dateTime.getMinute() + ":" + dateTime.getSecond())
+                                .date(dateTime.toLocalDate())
+                                .time(dateTime.toLocalTime())
                                 .build())
                         .build()))
                 .travelers(travelerList)
