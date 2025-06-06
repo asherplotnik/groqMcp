@@ -25,7 +25,7 @@ public class MongoSearchChatService implements Tool{
     private static final String URL = "https://api.groq.com/openai/v1/chat/completions";
     private final String modelName;
 
-    public MongoSearchChatService(GroqRestTemplate groqRestTemplate, MongoService mongoService, ObjectMapper objectMapper, @Value("${groq.model}") String modelName) {
+    public MongoSearchChatService(@Value("${groq.model}") String modelName, GroqRestTemplate groqRestTemplate, MongoService mongoService, ObjectMapper objectMapper) {
         this.groqRestTemplate = groqRestTemplate;
         this.mongoService = mongoService;
         this.objectMapper = objectMapper;
@@ -71,10 +71,7 @@ public class MongoSearchChatService implements Tool{
                 .build();
         GroqParameters params = GroqParameters.builder()
                 .type("object")
-                .properties(GroqProperties.builder()
-                        .collection(collectionProp)
-                        .filter(filterProp)
-                        .build())
+                .properties(Map.of("collection", collectionProp, "filter", filterProp))
                 .required(List.of("collection", "filter"))
                 .build();
         GroqTool findDocTool = GroqTool.builder()

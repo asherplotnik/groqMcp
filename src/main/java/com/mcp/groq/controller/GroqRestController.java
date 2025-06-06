@@ -3,6 +3,7 @@ package com.mcp.groq.controller;
 import com.mcp.groq.dto.FlightRequest;
 import com.mcp.groq.dto.FreeTextRequest;
 import com.mcp.groq.dto.ModelResponseDto;
+import com.mcp.groq.service.ApiSearchChatService;
 import com.mcp.groq.service.ApiService;
 import com.mcp.groq.service.MongoSearchChatService;
 import com.mcp.groq.service.MongoService;
@@ -18,6 +19,7 @@ public class GroqRestController {
 
     private final MongoSearchChatService mongoSearchChatService;
     private final ApiService apiService;
+    private final ApiSearchChatService apiSearchChatService;
 
     private final MongoService service;
 
@@ -44,5 +46,10 @@ public class GroqRestController {
     @PostMapping("/flight/search")
     public String searchFlight(@RequestBody FlightRequest requestBody) {
         return apiService.searchFlightOffer(requestBody);
+    }
+
+    @PostMapping("/chat/flight/search")
+    public ModelResponseDto searchFlightWithGroq(@RequestBody FreeTextRequest request) {
+        return apiSearchChatService.execute(request.getText());
     }
 }

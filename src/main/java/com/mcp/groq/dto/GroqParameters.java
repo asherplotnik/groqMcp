@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,5 +17,5 @@ public class GroqParameters {
     @JsonProperty("required")
     private List<String> required;
     @JsonProperty("properties")
-    private GroqProperties properties;
+    private Map <String, GroqProperty> properties;
 }
